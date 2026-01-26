@@ -8,7 +8,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.Tags;
@@ -24,14 +24,14 @@ public class LootConfigGen extends LootConfigProvider {
     }
 
     @SubscribeEvent
-    public static void data(GatherDataEvent event) {
+    public static void data(GatherDataEvent.Server event) {
         DataGenerator data = event.getGenerator();
         data.addProvider(true, new LootConfigGen(data.getPackOutput(), event.getLookupProvider()));
     }
 
     @Override
     protected void add(HolderLookup.Provider provider) {
-        this.add(ResourceLocation.fromNamespaceAndPath(EqualLoot.MODID, "bosses"), new LootShareConfig(provider.lookupOrThrow(Registries.ENTITY_TYPE)
+        this.add(Identifier.fromNamespaceAndPath(EqualLoot.MODID, "bosses"), new LootShareConfig(provider.lookupOrThrow(Registries.ENTITY_TYPE)
                 .getOrThrow(Tags.EntityTypes.BOSSES), HolderSet.empty(), 5,
                 0.05f, true,
                 300, LootShareConfig.KillerLoot.FILL, 10));

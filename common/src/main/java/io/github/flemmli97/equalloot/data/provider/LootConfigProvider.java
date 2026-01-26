@@ -5,10 +5,11 @@ import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.equalloot.data.LootConfigManager;
 import io.github.flemmli97.equalloot.data.LootShareConfig;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -17,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 
 public abstract class LootConfigProvider implements DataProvider {
 
-    private final Map<ResourceLocation, LootShareConfig> data = new HashMap<>();
+    private final Map<Identifier, LootShareConfig> data = new HashMap<>();
 
     private final PackOutput output;
     private final CompletableFuture<HolderLookup.Provider> lookup;
@@ -35,9 +36,9 @@ public abstract class LootConfigProvider implements DataProvider {
             this.add(provider);
             return provider;
         }).thenCompose(provider -> CompletableFuture.allOf(this.data.entrySet().stream().map(entry -> {
-            ResourceLocation id = entry.getKey();
+            Identifier id = entry.getKey();
             Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(id.getNamespace())
-                    .resolve(LootConfigManager.DIRECTORY).resolve(id.getPath() + ".json");
+                    .resolve(Registries.elementsDirPath(LootConfigManager.ID)).resolve(id.getPath() + ".json");
             JsonElement obj = LootShareConfig.CODEC.encodeStart(provider.createSerializationContext(JsonOps.INSTANCE), entry.getValue())
                     .getOrThrow();
             return DataProvider.saveStable(cache, obj, path);
@@ -49,7 +50,7 @@ public abstract class LootConfigProvider implements DataProvider {
         return "EqualLoot Config Gen";
     }
 
-    public void add(ResourceLocation id, LootShareConfig config) {
+    public void add(Identifier id, LootShareConfig config) {
         if (this.data.put(id, config) != null) {
             throw new IllegalStateException("Config already added for " + id);
         }

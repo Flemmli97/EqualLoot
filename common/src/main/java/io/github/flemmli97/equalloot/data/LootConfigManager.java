@@ -1,15 +1,13 @@
 package io.github.flemmli97.equalloot.data;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.equalloot.EqualLoot;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -22,13 +20,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class LootConfigManager extends SimpleJsonResourceReloadListener {
+public class LootConfigManager extends SimpleJsonResourceReloadListener<LootShareConfig> {
 
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(EqualLoot.MODID, "entity");
-    public static final String DIRECTORY = String.format("%s/%s", ID.getNamespace(), ID.getPath());
+    public static final ResourceKey<? extends Registry<LootShareConfig>> ID =
+            ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(EqualLoot.MODID, "entity"));
 
-    private static final Gson GSON = new Gson();
-    private static final Comparator<Map.Entry<ResourceLocation, LootShareConfig>> ORDER = (e1, e2) -> {
+    private static final Comparator<Map.Entry<Identifier, LootShareConfig>> ORDER = (e1, e2) -> {
         int priority = Integer.compare(e2.getValue().priority(), e1.getValue().priority());
         if (priority == 0)
             return e1.getKey().toString().compareTo(e2.getKey().toString());
@@ -38,13 +35,10 @@ public class LootConfigManager extends SimpleJsonResourceReloadListener {
     private static LootConfigManager INSTANCE;
 
     private final Map<EntityType<?>, Optional<LootShareConfig>> cache = new HashMap<>();
-    private Map<ResourceLocation, LootShareConfig> config = ImmutableMap.of();
-
-    private final HolderLookup.Provider provider;
+    private Map<Identifier, LootShareConfig> config = ImmutableMap.of();
 
     private LootConfigManager(HolderLookup.Provider provider) {
-        super(GSON, DIRECTORY);
-        this.provider = provider;
+        super(provider, LootShareConfig.CODEC, ID);
     }
 
     public static LootConfigManager create(HolderLookup.Provider provider) {
@@ -74,18 +68,8 @@ public class LootConfigManager extends SimpleJsonResourceReloadListener {
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> data, ResourceManager manager, ProfilerFiller profiler) {
+    protected void apply(Map<Identifier, LootShareConfig> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         this.cache.clear();
-        ImmutableMap.Builder<ResourceLocation, LootShareConfig> builder = ImmutableMap.builder();
-        DynamicOps<JsonElement> ops = this.provider.createSerializationContext(JsonOps.INSTANCE);
-        data.forEach((res, el) -> {
-            try {
-                LootShareConfig config = LootShareConfig.CODEC.parse(ops, el).getOrThrow();
-                builder.put(res, config);
-            } catch (Exception ex) {
-                EqualLoot.LOGGER.error("Couldn't parse config json {} {}", res, ex, ex.fillInStackTrace());
-            }
-        });
-        this.config = builder.build();
+        this.config = ImmutableMap.copyOf(map);
     }
 }

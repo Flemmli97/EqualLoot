@@ -35,7 +35,7 @@ public class EqualLoot {
         LootShareConfig config = LootConfigManager.getInstance().get(entity);
         if (config == null)
             return Collections.emptyList();
-        return PlayerDamageTracker.get(entity).getPlayersForDrops(entity.getServer(), config, entity.getKillCredit());
+        return PlayerDamageTracker.get(entity).getPlayersForDrops(entity.level().getServer(), config, entity.getKillCredit());
     }
 
     public interface EntityLootTableDrop {
