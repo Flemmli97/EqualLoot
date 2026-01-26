@@ -3,6 +3,7 @@ package io.github.flemmli97.equalloot.mixin;
 import io.github.flemmli97.equalloot.attachment.PlayerDamageTracker;
 import io.github.flemmli97.equalloot.utils.DamageContainerGetter;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -18,7 +19,7 @@ public class LivingEntityMixin implements DamageContainerGetter {
 
     @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
     private void loadData(CompoundTag compound, CallbackInfo info) {
-        this.equalLoot$DamageContainer.load(compound.getCompound(PlayerDamageTracker.ID.toString()));
+        this.equalLoot$DamageContainer.load(compound.getList(PlayerDamageTracker.ID.toString(), Tag.TAG_COMPOUND));
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))

@@ -5,8 +5,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.equalloot.EqualLoot;
 import io.github.flemmli97.equalloot.data.LootShareConfig;
 import io.github.flemmli97.equalloot.utils.DamageContainerGetter;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -40,7 +43,7 @@ public class PlayerDamageTracker {
         if (damageSource.getEntity() instanceof Player player) {
             float clamped = Math.min(amount, this.entity.getHealth());
             this.damageTracker.compute(player.getUUID(), (id, current) ->
-                    current != null ? current.add(clamped, this.entity.tickCount) : new DamageHolder(clamped, this.entity.tickCount));
+                    current != null ? current.add(clamped, this.entity.tickCount) : new DamageHolder(id, clamped, this.entity.tickCount));
         }
     }
 
@@ -73,31 +76,32 @@ public class PlayerDamageTracker {
         return players;
     }
 
-    public void load(CompoundTag tag) {
+    public void load(ListTag tag) {
         this.damageTracker.clear();
-        tag.getAllKeys().forEach(id -> {
-            this.damageTracker.put(UUID.fromString(id), DamageHolder.CODEC.parse(NbtOps.INSTANCE, tag.get(id)).getOrThrow());
+        tag.forEach(val -> {
+            DamageHolder holder = DamageHolder.CODEC.parse(NbtOps.INSTANCE, val).getOrThrow();
+            this.damageTracker.put(holder.id(), holder);
         });
     }
 
-    public CompoundTag save() {
-        CompoundTag tag = new CompoundTag();
-        this.damageTracker.forEach((id, holder) -> {
-            tag.put(id.toString(), DamageHolder.CODEC.encodeStart(NbtOps.INSTANCE, holder).getOrThrow());
-        });
+    public Tag save() {
+        ListTag tag = new ListTag();
+        this.damageTracker.values().forEach(holder ->
+                tag.add(DamageHolder.CODEC.encodeStart(NbtOps.INSTANCE, holder).getOrThrow()));
         return tag;
     }
 
-    private record DamageHolder(float amount, int lastHit) {
+    public record DamageHolder(UUID id, float amount, int lastHit) {
 
         public static final Codec<DamageHolder> CODEC = RecordCodecBuilder.create(instance ->
-                instance.group(Codec.FLOAT.fieldOf("amount").forGetter(DamageHolder::amount),
+                instance.group(UUIDUtil.CODEC.fieldOf("player").forGetter(DamageHolder::id),
+                                Codec.FLOAT.fieldOf("amount").forGetter(DamageHolder::amount),
                                 Codec.INT.fieldOf("last_hit").forGetter(DamageHolder::lastHit))
                         .apply(instance, DamageHolder::new)
         );
 
         private DamageHolder add(float amount, int time) {
-            return new DamageHolder(this.amount() + amount, time);
+            return new DamageHolder(this.id(), this.amount() + amount, time);
         }
     }
 }
