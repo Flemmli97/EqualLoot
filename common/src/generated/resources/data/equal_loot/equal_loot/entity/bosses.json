@@ -1,0 +1,10 @@
+{
+  "damaged_within": 300,
+  "exclude": [],
+  "include": "#c:bosses",
+  "killer_handling": "fill",
+  "max_players": 5,
+  "min_damage": 0.05,
+  "percentage": true,
+  "priority": 10
+}

@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.flemmli97.equalloot.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "CombatTrackerMixin",
+    "EntityMixin",
+    "ItemEntityMixin",
+    "LivingDropHandlerMixin",
+    "LivingEntityMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

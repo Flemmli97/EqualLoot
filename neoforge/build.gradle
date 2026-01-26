@@ -1,0 +1,21 @@
+plugins {
+    id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'com.modrinth.minotaur' version '2.+'
+    id 'io.github.flemmli97.multiloader.platform-neoforge'
+}
+
+neoForge {
+    runs {
+        var common = project(":common")
+        data {
+            data()
+            programArguments.addAll "--all", "--mod", "${mod_id}"
+            programArguments.addAll "--output", common.file("src/generated/resources").getAbsolutePath()
+            programArguments.addAll "--existing", file("src/main/resources").absolutePath
+            programArguments.addAll "--existing", common.file("src/main/resources").getAbsolutePath()
+        }
+        client {
+            jvmArgument "-XX:+AllowEnhancedClassRedefinition"
+        }
+    }
+}

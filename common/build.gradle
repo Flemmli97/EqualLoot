@@ -1,0 +1,7 @@
+plugins {
+    id 'io.github.flemmli97.multiloader.platform-common'
+}
+
+sourceSets.main.resources {
+    srcDir "src/generated/resources"
+}
