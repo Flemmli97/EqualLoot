@@ -22,28 +22,28 @@ public abstract class EntityMixin implements EntityDropsData {
     public abstract ItemEntity spawnAtLocation(ItemStack stack, float offsetY);
 
     @Unique
-    private Player equalLoot$playerDropContext;
+    private PlayerDropContext equalLoot$playerDropContext;
     @Unique
     private CustomDropsData equalLoot$custom;
 
     @Inject(method = "spawnAtLocation(Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDefaultPickUpDelay()V"))
     private void modifyItemEntity(ItemStack stack, float offsetY, CallbackInfoReturnable<ItemEntity> info, @Local ItemEntity entity) {
         if (this.equalLoot$playerDropContext() != null) {
-            ((UniqueItemDrop) entity).equalLoot$setUniqueItemDropTo(this.equalLoot$playerDropContext().getUUID());
+            ((UniqueItemDrop) entity).equalLoot$setUniqueItemDropTo(this.equalLoot$playerDropContext());
         }
         if (this.equalLoot$custom != null && this.equalLoot$custom.predicate().test(entity)
-                && !this.equalLoot$custom.players().isEmpty()) {
+                && !this.equalLoot$custom.result().players().isEmpty()) {
             CustomDropsData current = this.equalLoot$custom;
             this.equalLoot$custom = null;
-            Player first = current.players().stream().findFirst().get();
-            current.players().forEach(player -> {
+            Player first = current.result().players().stream().findFirst().get();
+            current.result().players().forEach(player -> {
                 if (player != first) {
-                    this.equalLoot$setPlayerDropContext(player);
+                    this.equalLoot$setPlayerDropContext(new PlayerDropContext(player, current.result().config()));
                     this.spawnAtLocation(entity.getItem().copy(), offsetY);
                     this.equalLoot$setPlayerDropContext(null);
                 }
             });
-            ((UniqueItemDrop) entity).equalLoot$setUniqueItemDropTo(first.getUUID());
+            ((UniqueItemDrop) entity).equalLoot$setUniqueItemDropTo(new PlayerDropContext(first, current.result().config()));
             this.equalLoot$custom = current;
         }
     }
@@ -56,13 +56,13 @@ public abstract class EntityMixin implements EntityDropsData {
     }
 
     @Override
-    public Player equalLoot$playerDropContext() {
+    public PlayerDropContext equalLoot$playerDropContext() {
         return equalLoot$playerDropContext;
     }
 
     @Override
-    public void equalLoot$setPlayerDropContext(Player player) {
-        this.equalLoot$playerDropContext = player;
+    public void equalLoot$setPlayerDropContext(PlayerDropContext context) {
+        this.equalLoot$playerDropContext = context;
     }
 
     @Override

@@ -8,10 +8,12 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 
+import java.util.Optional;
+
 public record LootShareConfig(HolderSet<EntityType<?>> include, HolderSet<EntityType<?>> exclude,
                               int maxPlayers, float minDamage, boolean percentage, int damagedWithin,
                               KillerLoot killerLoot,
-                              int priority) {
+                              int priority, boolean glowingDrops) {
 
     public static final Codec<LootShareConfig> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(RegistryCodecs.homogeneousList(Registries.ENTITY_TYPE).fieldOf("include").forGetter(LootShareConfig::include),
@@ -21,9 +23,21 @@ public record LootShareConfig(HolderSet<EntityType<?>> include, HolderSet<Entity
                             Codec.BOOL.fieldOf("percentage").forGetter(LootShareConfig::percentage),
                             Codec.INT.fieldOf("damaged_within").forGetter(LootShareConfig::damagedWithin),
                             KillerLoot.CODEC.fieldOf("killer_handling").forGetter(LootShareConfig::killerLoot),
-                            Codec.INT.fieldOf("priority").forGetter(LootShareConfig::priority))
+                            Codec.INT.fieldOf("priority").forGetter(LootShareConfig::priority),
+                            Codec.BOOL.optionalFieldOf("glowing_drops").forGetter(d -> d.glowingDrops() ? Optional.of(true) : Optional.empty()))
                     .apply(instance, LootShareConfig::new)
     );
+
+    public LootShareConfig(HolderSet<EntityType<?>> include, HolderSet<EntityType<?>> exclude, int maxPlayers, float minDamage, boolean percentage, int damagedWithin, KillerLoot killerLoot, int priority) {
+        this(include, exclude, maxPlayers, minDamage, percentage, damagedWithin, killerLoot, priority, true);
+    }
+
+    private LootShareConfig(HolderSet<EntityType<?>> include, HolderSet<EntityType<?>> exclude,
+                            int maxPlayers, float minDamage, boolean percentage, int damagedWithin,
+                            KillerLoot killerLoot,
+                            int priority, Optional<Boolean> glowingDrops) {
+        this(include, exclude, maxPlayers, minDamage, percentage, damagedWithin, killerLoot, priority, glowingDrops.orElse(false));
+    }
 
     public enum KillerLoot {
 

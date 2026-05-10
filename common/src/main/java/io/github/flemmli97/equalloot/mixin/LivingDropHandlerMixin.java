@@ -25,8 +25,8 @@ public abstract class LivingDropHandlerMixin {
      */
     @WrapOperation(method = "dropAllDeathLoot", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;dropFromLootTable(Lnet/minecraft/world/damagesource/DamageSource;Z)V"))
     private void onLootTableDeathDrop(LivingEntity instance, DamageSource damageSource, boolean hitByPlayer, Operation<Void> original) {
-        if (!EqualLoot.handleEntityDrops((LivingEntity) (Object) this, damageSource, source -> {
-            ((EntityDropsData) this).equalLoot$setPlayerDropContext((Player) source.getEntity());
+        if (!EqualLoot.handleEntityDrops((LivingEntity) (Object) this, damageSource, (source, config) -> {
+            ((EntityDropsData) this).equalLoot$setPlayerDropContext(new EntityDropsData.PlayerDropContext((Player) source.getEntity(), config));
             original.call(instance, source, hitByPlayer);
             ((EntityDropsData) this).equalLoot$setPlayerDropContext(null);
         })) {
@@ -40,7 +40,7 @@ public abstract class LivingDropHandlerMixin {
     @Inject(method = "dropFromLootTable", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootParams$Builder;create(Lnet/minecraft/world/level/storage/loot/parameters/LootContextParamSet;)Lnet/minecraft/world/level/storage/loot/LootParams;"))
     private void modifyLootParams(DamageSource damageSource, boolean hitByPlayer, CallbackInfo info, @Local LootParams.Builder builder) {
         if (hitByPlayer && ((EntityDropsData) this).equalLoot$playerDropContext() != null) {
-            builder.withLuck(((EntityDropsData) this).equalLoot$playerDropContext().getLuck());
+            builder.withLuck(((EntityDropsData) this).equalLoot$playerDropContext().player().getLuck());
         }
     }
 

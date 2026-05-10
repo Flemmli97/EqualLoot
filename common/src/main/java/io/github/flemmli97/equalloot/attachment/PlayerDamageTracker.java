@@ -6,7 +6,6 @@ import io.github.flemmli97.equalloot.EqualLoot;
 import io.github.flemmli97.equalloot.data.LootShareConfig;
 import io.github.flemmli97.equalloot.utils.DamageContainerGetter;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
