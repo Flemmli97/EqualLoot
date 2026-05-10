@@ -30,8 +30,8 @@ public abstract class LivingDropHandlerMixin {
      */
     @WrapOperation(method = "dropAllDeathLoot", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;Z)V"))
     private void onLootTableDeathDrop(LivingEntity instance, ServerLevel level, DamageSource damageSource, boolean playerKill, Operation<Void> original) {
-        if (!EqualLoot.handleEntityDrops((LivingEntity) (Object) this, damageSource, source -> {
-            ((EntityDropsData) this).equalLoot$setPlayerDropContext((Player) source.getEntity());
+        if (!EqualLoot.handleEntityDrops((LivingEntity) (Object) this, damageSource, (source, config) -> {
+            ((EntityDropsData) this).equalLoot$setPlayerDropContext(new EntityDropsData.PlayerDropContext((Player) source.getEntity(), config));
             original.call(instance, level, source, playerKill);
             ((EntityDropsData) this).equalLoot$setPlayerDropContext(null);
         })) {
@@ -45,7 +45,7 @@ public abstract class LivingDropHandlerMixin {
     @Inject(method = "dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;ZLnet/minecraft/resources/ResourceKey;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootParams$Builder;create(Lnet/minecraft/util/context/ContextKeySet;)Lnet/minecraft/world/level/storage/loot/LootParams;"))
     private void modifyLootParams(ServerLevel level, DamageSource damageSource, boolean playerKill, ResourceKey<LootTable> lootTable, Consumer<ItemStack> dropConsumer, CallbackInfo info, @Local LootParams.Builder builder) {
         if (playerKill && ((EntityDropsData) this).equalLoot$playerDropContext() != null) {
-            builder.withLuck(((EntityDropsData) this).equalLoot$playerDropContext().getLuck());
+            builder.withLuck(((EntityDropsData) this).equalLoot$playerDropContext().player().getLuck());
         }
     }
 

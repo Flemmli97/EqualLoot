@@ -18,28 +18,33 @@ public class EqualLoot {
     public static final Logger LOGGER = LogManager.getLogger("EqualLoot");
 
     public static boolean handleEntityDrops(LivingEntity entity, DamageSource originalSource, EntityLootTableDrop handler) {
-        Collection<Player> players = getPlayersForDrops(entity);
-        if (players.isEmpty())
+        DropResult result = getPlayersForDrops(entity);
+        if (result.players().isEmpty())
             return false;
-        players.forEach(player -> {
+        result.players().forEach(player -> {
             if (player.equals(originalSource.getEntity()))
-                handler.dropFromLootTable(originalSource);
+                handler.dropFromLootTable(originalSource, result.config());
             else {
-                handler.dropFromLootTable(entity.damageSources().playerAttack(player));
+                handler.dropFromLootTable(entity.damageSources().playerAttack(player), result.config());
             }
         });
         return true;
     }
 
-    public static Collection<Player> getPlayersForDrops(LivingEntity entity) {
+    public static DropResult getPlayersForDrops(LivingEntity entity) {
         LootShareConfig config = LootConfigManager.getInstance().get(entity);
         if (config == null)
-            return Collections.emptyList();
-        return PlayerDamageTracker.get(entity).getPlayersForDrops(entity.level().getServer(), config, entity.getKillCredit());
+            return DropResult.EMPTY;
+        return new DropResult(PlayerDamageTracker.get(entity).getPlayersForDrops(entity.level().getServer(), config, entity.getKillCredit()), config);
+    }
+
+    public record DropResult(Collection<Player> players, LootShareConfig config) {
+        public static final DropResult EMPTY = new DropResult(Collections.emptyList(), null);
+
     }
 
     public interface EntityLootTableDrop {
 
-        void dropFromLootTable(DamageSource damageSource);
+        void dropFromLootTable(DamageSource damageSource, LootShareConfig config);
     }
 }

@@ -1,6 +1,7 @@
 {
   "damaged_within": 300,
   "exclude": [],
+  "glowing_drops": true,
   "include": "#c:bosses",
   "killer_handling": "fill",
   "max_players": 5,

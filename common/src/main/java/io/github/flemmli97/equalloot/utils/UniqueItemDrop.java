@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public interface UniqueItemDrop {
 
-    void equalLoot$setUniqueItemDropTo(UUID target);
+    void equalLoot$setUniqueItemDropTo(EntityDropsData.PlayerDropContext target);
 
     boolean equalLoot$isUniqueItemDrop();
 
