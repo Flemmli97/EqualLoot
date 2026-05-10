@@ -16,6 +16,6 @@ import java.util.concurrent.Executor;
 public class EqualDropsFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        DataResourceLoader.get().registerReloader(LootConfigManager.ID.identifier(), LootConfigManager::create);
+        DataResourceLoader.get().registerReloadListener(LootConfigManager.ID.identifier(), LootConfigManager::create);
     }
 }

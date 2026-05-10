@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[${neo_loader_version},)"
+loaderVersion="[${neoforge_loader_version},)"
 license="${license}"
 issueTrackerURL="${sources_url}"
 [[mixins]]
