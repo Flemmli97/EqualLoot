@@ -1,11 +1,13 @@
 package io.github.flemmli97.equalloot.data;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.equalloot.EqualLoot;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -38,7 +40,7 @@ public class LootConfigManager extends SimpleJsonResourceReloadListener<LootShar
     private Map<Identifier, LootShareConfig> config = ImmutableMap.of();
 
     private LootConfigManager(HolderLookup.Provider provider) {
-        super(provider, LootShareConfig.CODEC, ID);
+        super(provider.createSerializationContext(JsonOps.INSTANCE), LootShareConfig.CODEC, FileToIdConverter.registry(ID));
     }
 
     public static LootConfigManager create(HolderLookup.Provider provider) {

@@ -26,7 +26,7 @@ public class LootConfigGen extends LootConfigProvider {
     @SubscribeEvent
     public static void data(GatherDataEvent.Server event) {
         DataGenerator data = event.getGenerator();
-        data.addProvider(true, new LootConfigGen(data.getPackOutput(), event.getLookupProvider()));
+        data.addProvider(true, new LootConfigGen(data.getPackOutput(), event.getReloadableLookupProvider()));
     }
 
     @Override

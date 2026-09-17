@@ -23,6 +23,7 @@
   "mixins": [
     "${mod_id}.mixins.json"
   ],
+  "accessWidener": "${mod_id}.accesswidener",
   "depends": {
     "fabric-api": ">=${fabric_api_version}",
     "minecraft": ">=${minecraft_version}"

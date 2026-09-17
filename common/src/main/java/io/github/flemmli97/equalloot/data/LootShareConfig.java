@@ -4,8 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.world.entity.EntityType;
 
 import java.util.Optional;
@@ -16,8 +16,8 @@ public record LootShareConfig(HolderSet<EntityType<?>> include, HolderSet<Entity
                               int priority, boolean glowingDrops) {
 
     public static final Codec<LootShareConfig> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(RegistryCodecs.homogeneousList(Registries.ENTITY_TYPE).fieldOf("include").forGetter(LootShareConfig::include),
-                            RegistryCodecs.homogeneousList(Registries.ENTITY_TYPE).fieldOf("exclude").forGetter(LootShareConfig::exclude),
+            instance.group(RegistryCodecs.holderSet(Registries.ENTITY_TYPE).fieldOf("include").forGetter(LootShareConfig::include),
+                            RegistryCodecs.holderSet(Registries.ENTITY_TYPE).fieldOf("exclude").forGetter(LootShareConfig::exclude),
                             Codec.INT.fieldOf("max_players").forGetter(LootShareConfig::maxPlayers),
                             Codec.FLOAT.fieldOf("min_damage").forGetter(LootShareConfig::minDamage),
                             Codec.BOOL.fieldOf("percentage").forGetter(LootShareConfig::percentage),
